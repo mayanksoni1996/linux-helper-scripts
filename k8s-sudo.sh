@@ -30,6 +30,9 @@ sudo firewall-cmd --add-port=2379-2380/tcp --permanent # etcd server client API
 sudo firewall-cmd --add-port=10250/tcp --permanent # Kubelet API
 sudo firewall-cmd --add-port=10251/tcp --permanent # Kube-scheduler
 sudo firewall-cmd --add-port=10252/tcp --permanent # Kube-controller-manager
+# HTTP Ports
+sudo firewall-cmd --add-port=80/tcp --permanent
+sudo firewall-cmd --add-port=443/tcp --permanent
 
 # Worker Node Ports (also needed on control plane if it runs pods):
 sudo firewall-cmd --add-port=30000-32767/tcp --permanent # NodePort Services
@@ -63,7 +66,7 @@ sudo sysctl --system
 
 # Install containerd
 sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-sudo dnf install -y containerd.io
+sudo dnf install -y docker-ce
 
 # Generate default containerd config and modify it to use systemd cgroup driver
 sudo containerd config default | sudo tee /etc/containerd/config.toml > /dev/null
@@ -81,10 +84,10 @@ echo "--- Adding Kubernetes Repository ---"
 cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
 name=Kubernetes
-baseurl=https://pkgs.k8s.io/core:/stable:/v1.28/rpm/
+baseurl=https://pkgs.k8s.io/core:/stable:/v1.32/rpm/
 enabled=1
 gpgcheck=1
-gpgkey=https://pkgs.k8s.io/core:/stable:/v1.28/rpm/repodata/repomd.xml.key
+gpgkey=https://pkgs.k8s.io/core:/stable:/v1.32/rpm/repodata/repomd.xml.key
 EOF
 
 # Update dnf cache
