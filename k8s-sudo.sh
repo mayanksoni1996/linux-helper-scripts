@@ -2,7 +2,10 @@
 
 # This script automates the installation of Kubernetes on Rocky Linux 9
 # based on the guide: https://medium.com/@redswitches/install-kubernetes-on-rocky-linux-9-b01909d6ba72
-
+# ---0. Updating the distro and downloading firewalld----
+echo "---- Performing Update and downloading required software --- " 
+dnf install -y epel-release 
+dnf install -y firewalld git tar curl wget
 # --- 1. Disable SELinux and Swap ---
 echo "--- Disabling SELinux and Swap ---"
 
