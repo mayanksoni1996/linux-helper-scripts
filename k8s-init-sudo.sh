@@ -38,4 +38,11 @@ curl https://raw.githubusercontent.com/projectcalico/calico/v3.30.2/manifests/cu
 kubectl create -f custom-resources.yaml
 
 echo "Kubernetes cluster initialization and Calico installation complete."
+
+# Remove the taint from the control plane node.
+# By default, control plane nodes have a taint that prevents pods from being scheduled on them.
+# Removing this taint allows the control plane node to also run workloads.
+kubectl taint node --all node-role.kubernetes.io/control-plane-
+
+echo "Control plane taint removed. Workloads can now run on the control plane node."
 echo "You should now be able to use kubectl to interact with your cluster."
