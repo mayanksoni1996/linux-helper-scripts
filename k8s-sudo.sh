@@ -107,6 +107,10 @@ sudo dnf install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
 sudo systemctl enable --now kubelet
 echo "Kubelet enabled and started."
 
+sudo curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+sudo chmod 700 get_helm.sh
+sudo ./get_helm.sh
+
 echo "--- Kubernetes pre-installation setup complete ---"
 echo "You can now initialize the Kubernetes control plane on the master node using 'sudo kubeadm init'."
 echo "On worker nodes, you can join the cluster using 'sudo kubeadm join ...'."
