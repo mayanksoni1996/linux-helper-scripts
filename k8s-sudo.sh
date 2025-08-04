@@ -1,17 +1,11 @@
 #!/bin/bash
 
 # This script automates the installation of Kubernetes on Rocky Linux 9
-# It is designed to be run on all nodes (control plane and workers)
-# as a prerequisite for a multi-node cluster.
-
-# Exit immediately if a command exits with a non-zero status
-set -e
-
-# --- 0. Updating the distro and downloading firewalld----
+# based on the guide: https://medium.com/@redswitches/install-kubernetes-on-rocky-linux-9-b01909d6ba72
+# ---0. Updating the distro and downloading firewalld----
 echo "---- Performing Update and downloading required software --- " 
 dnf install -y epel-release 
 dnf install -y firewalld git tar curl wget
-
 # --- 1. Disable SELinux and Swap ---
 echo "--- Disabling SELinux and Swap ---"
 
@@ -32,16 +26,21 @@ echo "--- Configuring FirewallD rules ---"
 # Ensure firewalld is running
 sudo systemctl enable --now firewalld
 
-# Define ports for both control plane and worker nodes
-# These rules will be applied to all nodes.
+# Open necessary ports for Kubernetes control plane and nodes
 # Control Plane Ports:
-sudo firewall-cmd --add-port=6443/tcp --permanent     # Kubernetes API server
+sudo firewall-cmd --add-port=6443/tcp --permanent # Kubernetes API server
 sudo firewall-cmd --add-port=2379-2380/tcp --permanent # etcd server client API
-sudo firewall-cmd --add-port=10250/tcp --permanent    # Kubelet API
-sudo firewall-cmd --add-port=10251/tcp --permanent    # Kube-scheduler
-sudo firewall-cmd --add-port=10252/tcp --permanent    # Kube-controller-manager
+sudo firewall-cmd --add-port=10250/tcp --permanent # Kubelet API
+sudo firewall-cmd --add-port=10251/tcp --permanent # Kube-scheduler
+sudo firewall-cmd --add-port=10252/tcp --permanent # Kube-controller-manager
+# HTTP Ports
+sudo firewall-cmd --add-port=80/tcp --permanent
+sudo firewall-cmd --add-port=443/tcp --permanent
+
 # Worker Node Ports (also needed on control plane if it runs pods):
 sudo firewall-cmd --add-port=30000-32767/tcp --permanent # NodePort Services
+sudo firewall-cmd --add-port=10255/tcp --permanent # Kubelet read-only port (deprecated but often useful)
+
 # Reload firewall rules
 sudo firewall-cmd --reload
 echo "Firewall rules configured and reloaded."
@@ -70,7 +69,7 @@ sudo sysctl --system
 
 # Install containerd
 sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-sudo dnf install -y containerd.io
+sudo dnf install -y docker-ce
 
 # Generate default containerd config and modify it to use systemd cgroup driver
 sudo containerd config default | sudo tee /etc/containerd/config.toml > /dev/null
@@ -88,10 +87,10 @@ echo "--- Adding Kubernetes Repository ---"
 cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
 name=Kubernetes
-baseurl=https://pkgs.k8s.io/core:/stable:/v1.28/rpm/
+baseurl=https://pkgs.k8s.io/core:/stable:/v1.32/rpm/
 enabled=1
 gpgcheck=1
-gpgkey=https://pkgs.k8s.io/core:/stable:/v1.28/rpm/repodata/repomd.xml.key
+gpgkey=https://pkgs.k8s.io/core:/stable:/v1.32/rpm/repodata/repomd.xml.key
 EOF
 
 # Update dnf cache
@@ -108,4 +107,10 @@ sudo dnf install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
 sudo systemctl enable --now kubelet
 echo "Kubelet enabled and started."
 
+sudo curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+sudo chmod 700 get_helm.sh
+sudo ./get_helm.sh
+
 echo "--- Kubernetes pre-installation setup complete ---"
+echo "You can now initialize the Kubernetes control plane on the master node using 'sudo kubeadm init'."
+echo "On worker nodes, you can join the cluster using 'sudo kubeadm join ...'."
