@@ -40,6 +40,7 @@ sudo firewall-cmd --add-port=443/tcp --permanent
 # Worker Node Ports (also needed on control plane if it runs pods):
 sudo firewall-cmd --add-port=30000-32767/tcp --permanent # NodePort Services
 sudo firewall-cmd --add-port=10255/tcp --permanent # Kubelet read-only port (deprecated but often useful)
+sudo firewall-cmd --add-port=179/tcp --permanent
 
 # Reload firewall rules
 sudo firewall-cmd --reload
