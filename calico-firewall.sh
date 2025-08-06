@@ -21,7 +21,8 @@ echo "[INFO] Adding port $WEBHOOK_PORT to $TRUSTED_ZONE..."
 sudo firewall-cmd --permanent --zone=$TRUSTED_ZONE --add-port=$WEBHOOK_PORT || true
 
 echo "[INFO] Adding Calico interfaces to $TRUSTED_ZONE..."
-for iface in $(ip -o link show | awk -F': ' '{print $2}' | grep '^cali'); do
+# Strip @ifX from interface names
+for iface in $(ip -o link show | awk -F': ' '{print $2}' | grep '^cali' | cut -d'@' -f1); do
     echo " - Adding $iface..."
     sudo firewall-cmd --permanent --zone=$TRUSTED_ZONE --add-interface="$iface" || true
 done
@@ -32,7 +33,7 @@ if ip link show vxlan.calico &> /dev/null; then
     sudo firewall-cmd --permanent --zone=$TRUSTED_ZONE --add-interface="vxlan.calico" || true
 fi
 
-# Optional: Enable masquerading for SNAT where needed
+# Optional: Enable masquerading
 echo "[INFO] Enabling masquerade in $TRUSTED_ZONE..."
 sudo firewall-cmd --permanent --zone=$TRUSTED_ZONE --add-masquerade || true
 
