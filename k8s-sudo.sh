@@ -41,6 +41,9 @@ sudo firewall-cmd --add-port=443/tcp --permanent
 #sudo firewall-cmd --add-port=30000-32767/tcp --permanent # NodePort Services
 sudo firewall-cmd --add-port=10255/tcp --permanent # Kubelet read-only port (deprecated but often useful)
 sudo firewall-cmd --add-port=179/tcp --permanent
+sudo firewall-cmd --zone=public --add-port=179/tcp --permanent
+sudo firewall-cmd --zone=public --add-port=4789/udp --permanent
+sudo firewall-cmd --zone=public --add-port=5473/tcp --permanent
 sudo firewall-cmd --add-service=bgp --permanent
 sudo firewall-cmd --add-protocol=ipip --permanent
 sudo firewall-cmd --add-port=5473/tcp --permanent
