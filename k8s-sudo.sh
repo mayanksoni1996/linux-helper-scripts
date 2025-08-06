@@ -44,6 +44,7 @@ sudo firewall-cmd --add-port=179/tcp --permanent
 sudo firewall-cmd --add-service=bgp --permanent
 sudo firewall-cmd --add-protocol=ipip --permanent
 sudo firewall-cmd --add-port=5473/tcp --permanent
+sudo firewall-cmd --add-source=192.168.0.0/16 --zone=trusted --permanent
 
 # Reload firewall rules
 sudo firewall-cmd --reload
